@@ -12,8 +12,11 @@
 | `apps`                 | --                       | (optional) The apps to render in the apps menu.                                                                                                                                         | `ModusNavbarApp[]`        | `undefined` |
 | `buttons`              | --                       | (optional) The buttons to render in the Navbar.                                                                                                                                         | `ModusNavbarButton[]`     | `undefined` |
 | `enableSearchOverlay`  | `enable-search-overlay`  | (optional) Whether to show search overlay or not.                                                                                                                                       | `boolean`                 | `undefined` |
+| `helpTooltip`          | --                       | (optional) Help tooltip.                                                                                                                                                                | `ModusNavbarTooltip`      | `undefined` |
 | `helpUrl`              | `help-url`               | (optional) Help URL.                                                                                                                                                                    | `string`                  | `undefined` |
 | `logoOptions`          | --                       | (optional) Set the primary logo to display when the screen size is greater than 576 pixels, and the secondary logo to display when the screen size is less than or equal to 576 pixels. | `ModusNavbarLogoOptions`  | `undefined` |
+| `navAriaLabel`         | `nav-aria-label`         | (optional) The navbar's aria-label.                                                                                                                                                     | `string`                  | `undefined` |
+| `notificationCount`    | `notification-count`     | (optional) Whether to show badge on top of notification                                                                                                                                 | `number`                  | `undefined` |
 | `profileMenuOptions`   | --                       | (required) Profile menu options.                                                                                                                                                        | `ModusProfileMenuOptions` | `undefined` |
 | `reverse`              | `reverse`                | (optional) Whether to display the navbar items in reverse order.                                                                                                                        | `boolean`                 | `undefined` |
 | `searchTooltip`        | --                       | (optional) Search tooltip.                                                                                                                                                              | `ModusNavbarTooltip`      | `undefined` |
@@ -22,6 +25,7 @@
 | `showMainMenu`         | `show-main-menu`         | (optional) Whether to show the main menu.                                                                                                                                               | `boolean`                 | `undefined` |
 | `showNotifications`    | `show-notifications`     | (optional) Whether to show notifications.                                                                                                                                               | `boolean`                 | `undefined` |
 | `showPendoPlaceholder` | `show-pendo-placeholder` | (optional) Whether to show the placeholder for Pendo.                                                                                                                                   | `boolean`                 | `undefined` |
+| `showProfile`          | `show-profile`           | (optional) Whether to show profile.  *                                                                                                                                                  | `boolean`                 | `true`      |
 | `showSearch`           | `show-search`            | (optional) Whether to show search.                                                                                                                                                      | `boolean`                 | `undefined` |
 | `showShadow`           | `show-shadow`            | (optional) Whether to show a shadow under the navbar.                                                                                                                                   | `boolean`                 | `undefined` |
 | `variant`              | `variant`                | (optional) Color variants for NavBar.                                                                                                                                                   | `"blue" \| "default"`     | `'default'` |
@@ -73,6 +77,7 @@ Type: `Promise<void>`
 - [modus-navbar-search-overlay](search-overlay)
 - [modus-navbar-main-menu](main-menu)
 - [modus-tooltip](../modus-tooltip)
+- [modus-badge](../modus-badge)
 - [modus-navbar-notifications-menu](notifications-menu)
 - [modus-navbar-apps-menu](apps-menu)
 - [modus-navbar-profile-menu](profile-menu)
@@ -85,6 +90,7 @@ graph TD;
   modus-navbar --> modus-navbar-search-overlay
   modus-navbar --> modus-navbar-main-menu
   modus-navbar --> modus-tooltip
+  modus-navbar --> modus-badge
   modus-navbar --> modus-navbar-notifications-menu
   modus-navbar --> modus-navbar-apps-menu
   modus-navbar --> modus-navbar-profile-menu

@@ -20,6 +20,7 @@ import {
 } from '@tanstack/table-core';
 import {
   ModusTableColumn,
+  ModusTableColumnSort,
   ModusTableRowSelectionOptions,
   ModusTableSortingState,
   ModusTableToolbarOptions,
@@ -43,6 +44,9 @@ export interface TableCoreOptions {
   manualSorting?: boolean;
   sortingState?: ModusTableSortingState;
   preSelectedRows?: RowSelectionState;
+  defaultSort?: ModusTableColumnSort;
+  wrapText?: boolean;
+  currentPageSize: number;
 
   getRowId(originalRow: unknown, index: number, parent?: Row<unknown>): string;
   setExpanded: (updater: Updater<ExpandedState>) => void;
@@ -75,6 +79,8 @@ export default class ModusTableCore {
       pageCount,
       manualSorting,
       sortingState,
+      defaultSort,
+      currentPageSize,
       getRowId,
       setExpanded,
       setSorting,
@@ -86,7 +92,9 @@ export default class ModusTableCore {
       setColumnOrder,
     } = tableOptions;
     const { multiple, subRowSelection } = rowSelectionOptions;
+    const defaultSortState = defaultSort ? [defaultSort] : [];
     const options: TableOptionsResolved<unknown> = {
+      autoResetPageIndex: false,
       data: data ?? [],
       columns: (columns as ColumnDef<unknown>[]) ?? [],
       state: {
@@ -96,11 +104,11 @@ export default class ModusTableCore {
         columnVisibility: {},
         columnOrder: columnOrder,
         expanded: null,
-        sorting: manualSorting ? sortingState : [],
+        sorting: manualSorting ? sortingState : defaultSortState,
         rowSelection: preSelectedRows,
-        pagination: pagination && {
+        pagination: {
           pageIndex: 0,
-          pageSize: pageSizeList[0],
+          pageSize: pagination ? (currentPageSize ? currentPageSize : pageSizeList[0]) : data?.length,
         },
       },
       enableRowSelection: rowSelection,
@@ -125,7 +133,7 @@ export default class ModusTableCore {
       onColumnVisibilityChange: setColumnVisibility,
       onColumnOrderChange: setColumnOrder,
       getCoreRowModel: getCoreRowModel(),
-      getPaginationRowModel: pagination && getPaginationRowModel(),
+      getPaginationRowModel: getPaginationRowModel(),
       getSortedRowModel: getSortedRowModel(),
       getExpandedRowModel: getExpandedRowModel(),
       getSubRows: (row) => row[COLUMN_DEF_SUB_ROWS_KEY],

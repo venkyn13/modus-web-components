@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import { Component, Element, Event, EventEmitter, h, JSX, Listen, Method, Prop, State } from '@stencil/core';
-import { IconClose } from '../icons/icon-close';
+import { IconClose } from '../../icons/svgs/icon-close';
 import { FocusWrap, ModalFocusWrapping } from './modal-focus-wrapping';
 import { Fragment } from '@stencil/core/internal';
 
@@ -204,11 +204,12 @@ export class ModusModal {
   render(): unknown {
     return (
       <div
-        aria-hidden={this.closed}
-        aria-label={this.ariaLabel}
+        aria-hidden={this.visible ? undefined : 'true'}
+        aria-label={this.visible ? this.ariaLabel || undefined : undefined}
+        aria-modal={this.visible ? 'true' : undefined}
         class={`modus-modal overlay ${this.visible ? 'visible' : 'hidden'}`}
         onClick={(event) => this.handleOverlayClick(event)}
-        role="dialog"
+        role={this.visible ? 'dialog' : undefined}
         style={{ zIndex: this.zIndex }}>
         {this.renderModal()}
       </div>

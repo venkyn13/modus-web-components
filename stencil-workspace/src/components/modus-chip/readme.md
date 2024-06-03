@@ -9,6 +9,7 @@
 
 | Property        | Attribute        | Description                                                                    | Type                   | Default     |
 | --------------- | ---------------- | ------------------------------------------------------------------------------ | ---------------------- | ----------- |
+| `active`        | `active`         | (optional) Whether the chip is active.                                         | `boolean`              | `false`     |
 | `ariaLabel`     | `aria-label`     | (optional) The chip's aria-label.                                              | `string`               | `undefined` |
 | `chipStyle`     | `chip-style`     | (optional) The chip's style.                                                   | `"outline" \| "solid"` | `'solid'`   |
 | `disabled`      | `disabled`       | (optional) Whether the chip is disabled.                                       | `boolean`              | `false`     |
@@ -28,6 +29,19 @@
 | `chipClick`  | An event that fires on chip click.       | `CustomEvent<any>` |
 | `closeClick` | An event that fires on close icon click. | `CustomEvent<any>` |
 
+
+## Dependencies
+
+### Used by
+
+ - [modus-autocomplete](../modus-autocomplete)
+
+### Graph
+```mermaid
+graph TD;
+  modus-autocomplete --> modus-chip
+  style modus-chip fill:#f9f,stroke:#333,stroke-width:4px
+```
 
 ----------------------------------------------
 

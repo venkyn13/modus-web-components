@@ -9,7 +9,7 @@ import {
   Watch,
   State,
 } from '@stencil/core';
-import { IconMap } from '../icons/IconMap';
+import { ModusIconMap } from '../../icons/ModusIconMap';
 import DateInputFormatter from './utils/modus-date-input.formatter';
 import { ModusDateInputEventDetails, ModusDateInputType } from './utils/modus-date-input.models';
 
@@ -312,7 +312,7 @@ export class ModusDateInput {
           part="input-container">
           <input
             aria-invalid={!!this.errorText}
-            aria-label={this.ariaLabel}
+            aria-label={this.ariaLabel || undefined}
             aria-required={this.required?.toString()}
             autofocus={this.autoFocusInput}
             class={{ 'has-right-icon': this.showCalendarIcon }}
@@ -337,7 +337,7 @@ export class ModusDateInput {
               onClick={() => this.handleCalendarClick()}
               role="button"
               aria-label="Open calendar">
-              <IconMap icon="calendar" size="16" />
+              <ModusIconMap icon="calendar" size="16" />
             </span>
           )}
         </div>

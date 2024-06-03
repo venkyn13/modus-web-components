@@ -42,6 +42,14 @@ export default {
         type: { summary: 'string' },
       },
     },
+    disableCloseOnSelect: {
+      name: 'disable-close-on-select',
+      description: 'Whether the autocomplete options always display on select',
+      table: {
+        defaultValue: { summary: false },
+        type: { summary: 'boolean' },
+      },
+    },
     errorText: {
       name: 'error-text',
       description: "The autocomplete's error text",
@@ -132,6 +140,13 @@ export default {
       table: {
         type: { summary: 'string' },
       },
+    },
+    multiple: {
+      description: "When enabled, multiple options can be selected in the component. And selected options are shown as chips in the input",
+      table: {
+        defaultValue: { summary: false },
+        type: { summary: 'boolean' },
+      },
     }
   },
   parameters: {
@@ -152,57 +167,68 @@ export default {
   },
 };
 
-export const Default = ({
-                          ariaLabel,
-                          clearable,
-                          disabled,
-                          dropdownMaxHeight,
-                          dropdownZIndex,
-                          errorText,
-                          includeSearchIcon,
-                          label,
-                          noResultsFoundText,
-                          noResultsFoundSubtext,
-                          placeholder,
-                          readOnly,
-                          required,
-                          showNoResultsFoundMessage,
-                          showOptionsOnFocus,
-                          size,
-                          value }) => html`
+const Template = ({
+  ariaLabel,
+  clearable,
+  disabled,
+  dropdownMaxHeight,
+  dropdownZIndex,
+  disableCloseOnSelect,
+  errorText,
+  includeSearchIcon,
+  label,
+  multiple,
+  noResultsFoundText,
+  noResultsFoundSubtext,
+  placeholder,
+  readOnly,
+  required,
+  showNoResultsFoundMessage,
+  showOptionsOnFocus,
+  size,
+  value,
+  options,
+}) => html`
   <div style="width: 600px">
     <modus-autocomplete
       id="autocomplete-default"
       aria-label=${ariaLabel}
       clearable=${clearable}
-      disabled=${disabled}
+      ?disabled=${disabled}
+      disable-close-on-select=${disableCloseOnSelect}
       dropdown-max-height=${dropdownMaxHeight}
       dropdown-z-index=${dropdownZIndex}
       error-text=${errorText}
       include-search-icon=${includeSearchIcon}
       label=${label}
+      multiple=${multiple}
       no-results-found-text=${noResultsFoundText}
       no-results-found-subtext=${noResultsFoundSubtext}
       placeholder=${placeholder}
       read-only=${readOnly}
-      required=${required}
+      ?required=${required}
       show-no-results-found-message=${showNoResultsFoundMessage}
       show-options-on-focus=${showOptionsOnFocus}
       size=${size}
-      value=${value}>
+      value=${value}
+      .options=${options}>
     </modus-autocomplete>
   </div>
-  ${setAutocomplete()}
 `;
-Default.args = {
+
+const defaultOptions = ['Apple', 'Banana', 'Orange'];
+
+const defaultArgs = {
   ariaLabel: 'autocomplete',
   clearable: false,
   disabled: false,
+  disableCloseOnSelect: false,
   dropdownMaxHeight: '300px',
   dropdownZIndex: '1',
   errorText: '',
   includeSearchIcon: true,
   label: 'Default Autocomplete',
+  multiple: false,
   noResultsFoundText: 'No results found',
   noResultsFoundSubtext: 'Check spelling or try a different keyword',
   placeholder: 'Search...',
@@ -212,109 +238,39 @@ Default.args = {
   showOptionsOnFocus: false,
   size: 'medium',
   value: '',
+  options: defaultOptions,
 }
 
-// The <script> tag cannot be used in the MDX file, so we use this method to
-// set the data table data for the default story.
-const setAutocomplete = () => {
-  const tag = document.createElement('script');
-  tag.innerHTML = `
-    document.querySelector('#autocomplete-default').options = ['Apple', 'Banana', 'Orange'];
-  `;
+export const Default = Template.bind({});
+Default.args = defaultArgs;
 
-  return tag;
-};
+export const WithOption = Template.bind({});
+WithOption.args = { ...defaultArgs, label: 'Autocomplete using option model' };
 
-export const WithOption = ({
-                             ariaLabel,
-                             clearable,
-                             disabled,
-                             dropdownMaxHeight,
-                             dropdownZIndex,
-                             errorText,
-                             includeSearchIcon,
-                             label,
-                             noResultsFoundText,
-                             noResultsFoundSubtext,
-                             placeholder,
-                             readOnly,
-                             required,
-                             showNoResultsFoundMessage,
-                             showOptionsOnFocus,
-                             size,
-                             value }) => html`
-  <div style="width: 600px">
-    <modus-autocomplete
-      id="autocomplete-with-option"
-      aria-label=${ariaLabel}
-      clearable=${clearable}
-      disabled=${disabled}
-      dropdown-max-height=${dropdownMaxHeight}
-      dropdown-z-index=${dropdownZIndex}
-      error-text=${errorText}
-      include-search-icon=${includeSearchIcon}
-      label=${label}
-      no-results-found-text=${noResultsFoundText}
-      no-results-found-subtext=${noResultsFoundSubtext}
-      placeholder=${placeholder}
-      read-only=${readOnly}
-      required=${required}
-      show-no-results-found-message=${showNoResultsFoundMessage}
-      show-options-on-focus=${showOptionsOnFocus}
-      size=${size}
-      value=${value}>
-    </modus-autocomplete>
-  </div>
-  ${setAutocompleteWithOption()}
-`;
-WithOption.args = {
-  ariaLabel: 'autocomplete',
-  clearable: false,
-  disabled: false,
-  dropdownMaxHeight: '300px',
-  dropdownZIndex: '1',
-  errorText: '',
-  includeSearchIcon: true,
-  label: 'Autocomplete using option model',
-  noResultsFoundText: 'No results found',
-  noResultsFoundSubtext: 'Check spelling or try a different keyword',
-  placeholder: 'Search...',
-  readOnly: false,
-  required: false,
-  showNoResultsFoundMessage: true,
-  showOptionsOnFocus: false,
-  size: 'medium',
-  value: '',
-}
-// The <script> tag cannot be used in the MDX file, so we use this method to
-// set the data table data for the default story.
-const setAutocompleteWithOption = () => {
-  const tag = document.createElement('script');
-  tag.innerHTML = `
-    document.querySelector('#autocomplete-with-option').options = [{ id: '0', value: 'Apple' }, { id: '1', value: 'Banana' }, { id: '2', value: 'Orange' }];
-  `;
-
-  return tag;
-};
+export const WithChips = Template.bind({});
+WithChips.args = { ...defaultArgs, label: 'Autocomplete using chips', multiple: true };
 
 export const WithCustomOption = ({
-                                   ariaLabel,
-                                   clearable,
-                                   disabled,
-                                   dropdownMaxHeight,
-                                   dropdownZIndex,
-                                   errorText,
-                                   includeSearchIcon,
-                                   label,
-                                   noResultsFoundText,
-                                   noResultsFoundSubtext,
-                                   placeholder,
-                                   readOnly,
-                                   required,
-                                   showNoResultsFoundMessage,
-                                   showOptionsOnFocus,
-                                   size,
-                                   value }) => html`
+  ariaLabel,
+  clearable,
+  disabled,
+  dropdownMaxHeight,
+  dropdownZIndex,
+  disableCloseOnSelect,
+  errorText,
+  includeSearchIcon,
+  label,
+  multiple,
+  noResultsFoundText,
+  noResultsFoundSubtext,
+  placeholder,
+  readOnly,
+  required,
+  showNoResultsFoundMessage,
+  showOptionsOnFocus,
+  size,
+  value,
+}) => html`
   <div style="width: 600px">
     <modus-autocomplete
       aria-label=${ariaLabel}
@@ -322,9 +278,11 @@ export const WithCustomOption = ({
       disabled=${disabled}
       dropdown-max-height=${dropdownMaxHeight}
       dropdown-z-index=${dropdownZIndex}
+      disable-close-on-select=${disableCloseOnSelect}
       error-text=${errorText}
       include-search-icon=${includeSearchIcon}
       label=${label}
+      multiple=${multiple}
       no-results-found-text=${noResultsFoundText}
       no-results-found-subtext=${noResultsFoundSubtext}
       placeholder=${placeholder}
@@ -345,15 +303,18 @@ export const WithCustomOption = ({
     </modus-autocomplete>
   </div>
 `;
+
 WithCustomOption.args = {
   ariaLabel: 'autocomplete',
   clearable: false,
   disabled: false,
   dropdownMaxHeight: '300px',
   dropdownZIndex: '1',
+  disableCloseOnSelect: false,
   errorText: '',
   includeSearchIcon: true,
   label: 'Employee Search',
+  multiple: false,
   noResultsFoundText: 'No results found',
   noResultsFoundSubtext: 'Check spelling or try a different keyword',
   placeholder: 'Search...',

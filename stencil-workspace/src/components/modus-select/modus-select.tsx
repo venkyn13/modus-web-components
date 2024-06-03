@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Component, Event, EventEmitter, h, JSX, Method, Prop, State, Watch } from '@stencil/core';
-import { createGuid } from '../../utils/utils';
+import { createGuid, generateElementId } from '../../utils/utils';
 
 @Component({
   tag: 'modus-select',
@@ -29,6 +29,9 @@ export class ModusSelect {
   /** The options property to render in the dropdown list. */
   @Prop() optionsDisplayProp: string;
 
+  /** (optional) The input's placeholder. */
+  @Prop() placeholder = 'Please Select';
+
   /** (optional) Whether the input is required. */
   @Prop() required: boolean;
 
@@ -53,6 +56,8 @@ export class ModusSelect {
 
   @State() internalValue: unknown;
   @State() optionIdMap: Map<string, unknown> = new Map();
+
+  private selectId = generateElementId() + '_select';
 
   selectInput: HTMLSelectElement;
 
@@ -96,7 +101,7 @@ export class ModusSelect {
   renderLabel(): JSX.Element | null {
     return this.label || this.required ? (
       <div class="label-container">
-        {this.label ? <label>{this.label}</label> : null}
+        {this.label ? <label htmlFor={this.selectId}>{this.label}</label> : null}
         {this.required ? <span class="required">*</span> : null}
       </div>
     ) : null;
@@ -126,14 +131,18 @@ export class ModusSelect {
             part="input"
             ref={(el) => (this.selectInput = el)}
             disabled={this.disabled}
+            id={this.selectId}
             class={selectClass}
-            aria-label={this.ariaLabel}
+            aria-label={this.ariaLabel || undefined}
             onBlur={(e) => this.inputBlur.emit(e)}
             onChange={(event) => {
               this.handleSelectChange(event);
             }}
             aria-invalid={!!this.errorText}
             aria-required={this.required?.toString()}>
+            <option value="" disabled selected>
+              {this.placeholder}
+            </option>
             {this.renderOptions()}
           </select>
           {this.renderSubText()}

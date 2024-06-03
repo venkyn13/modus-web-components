@@ -2,7 +2,7 @@
 import { Component, Prop, h } from '@stencil/core';
 
 export type BadgeProperties = {
-  ariaLabel?: string | null;
+  ariaLabel: string | null;
   color?: 'danger' | 'dark' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning';
   size?: 'small' | 'medium' | 'large';
   type?: 'counter' | 'default' | 'text';
@@ -54,7 +54,7 @@ export class ModusBadge implements BadgeProperties {
     )}`;
 
     return (
-      <div aria-label={this.ariaLabel} class={className} role="status">
+      <div aria-label={this.ariaLabel || undefined} class={className} role="status">
         <slot />
       </div>
     );

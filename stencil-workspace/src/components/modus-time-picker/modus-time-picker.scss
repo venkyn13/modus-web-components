@@ -49,6 +49,7 @@
     background-color: $modus-input-bg;
     border: $rem-1px solid $modus-input-border-color;
     border-bottom-color: $modus-input-bottom-line-color;
+    border-radius: 4px;
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
@@ -63,6 +64,7 @@
       background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
       border: none;
       color: $modus-input-color;
+      font-family: $primary-font;
       font-size: $rem-12px;
       outline: none;
       padding: 0 $rem-8px;

@@ -257,4 +257,607 @@ describe('modus-autocomplete', () => {
 
     expect(options.length).toEqual(2);
   });
+
+  it('should default text input autocomplete to off', async () => {
+    const element = await page.find('modus-autocomplete');
+    expect(element).toHaveClass('hydrated');
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+
+    const autocomplete = await textInput.getProperty('autocomplete');
+    expect(autocomplete).toEqual('off');
+  });
+
+  it('should display noResultsFoundText prop when value property change and not matching', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('options', ['Test 1', 'Test 2']);
+    await page.waitForChanges();
+
+    let textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    const options = await page.findAll('modus-autocomplete >>> .options-container li');
+
+    await options[1].click();
+
+    element.setProperty('value', 'hello');
+
+    await page.waitForChanges();
+
+    textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+
+    const noResultsFoundMessage = await page.find('modus-autocomplete >>> .no-results');
+    expect(noResultsFoundMessage.innerText.includes('No results found')).toBeTruthy();
+  });
+
+  it('should display all options when value property change to empty value', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('options', ['Test 1', 'Test 2']);
+    await page.waitForChanges();
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test 1');
+    await page.waitForChanges();
+
+    let options = await page.findAll('modus-autocomplete >>> .options-container li');
+
+    expect(options.length).toBe(1);
+
+    element.setProperty('value', '');
+
+    await page.waitForChanges();
+
+    await textInput.click();
+
+    await textInput.type('T');
+    await page.waitForChanges();
+    options = await page.findAll('modus-autocomplete >>> .options-container li');
+    expect(options.length).toBe(2);
+  });
+
+  it('should display selected option when value property change to a matching option', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('options', ['Test 1', 'Test 2']);
+    await page.waitForChanges();
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test 1');
+    await page.waitForChanges();
+
+    let options = await page.findAll('modus-autocomplete >>> .options-container li');
+
+    expect(options.length).toBe(1);
+
+    element.setProperty('value', 'Test 2');
+
+    await page.waitForChanges();
+
+    await textInput.click();
+
+    await page.waitForChanges();
+    options = await page.findAll('modus-autocomplete >>> .options-container li');
+    expect(options.length).toBe(1);
+  });
+
+  it('should display options on focus without close when disableCloseOnSelect prop is true', async () => {
+    const element = await page.find('modus-autocomplete');
+    expect(element).toHaveClass('hydrated');
+
+    element.setProperty('options', [
+      { id: 1, value: 'Test 1' },
+      { id: 2, value: 'Test 2' },
+    ]);
+
+    element.setProperty('disableCloseOnSelect', true);
+
+    await page.waitForChanges();
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+
+    await page.waitForChanges();
+
+    const options = await page.findAll('modus-autocomplete >>> .options-container li');
+
+    options[0].click();
+    await page.waitForChanges();
+    expect(options.length).toEqual(2);
+  });
+
+  it('should display custom options on focus without close when disableCloseOnSelect prop is true', async () => {
+    const page = await newE2EPage();
+    await page.setContent(`
+      <modus-autocomplete>
+        <li id="item-1" data-search-value="Test Option 1" data-id="1" style="padding: 8px">
+          <div style="font-weight: bold">Test Option 1</div>
+          <div style="font-size: 12px">Option Description</div>
+        </li>
+        <li id="item-2" data-search-value="Test Option 2" data-id="2" style="padding: 8px">
+          <div style="font-weight: bold">Test Option 2</div>
+          <div style="font-size: 12px">Option Description</div>
+        </li>
+      </modus-autocomplete>
+    `);
+    await page.waitForChanges();
+
+    const element = await page.find('modus-autocomplete');
+
+    element.setProperty('disableCloseOnSelect', true);
+
+    await page.waitForChanges();
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+
+    await page.waitForChanges();
+
+    const options = await page.findAll('modus-autocomplete >>> .options-container li.custom-option');
+
+    options[0].click();
+    await page.waitForChanges();
+    expect(options.length).toEqual(2);
+  });
+
+  it('should select the option by hitting Space', async () => {
+    const element = await page.find('modus-autocomplete');
+    expect(element).toHaveClass('hydrated');
+
+    element.setProperty('disableCloseOnSelect', true);
+    element.setProperty('options', [
+      { id: 1, value: 'Test 1' },
+      { id: 2, value: 'Test 2' },
+    ]);
+    await page.waitForChanges();
+
+    const optionSelected = await page.spyOnEvent('optionSelected');
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+
+    await page.waitForChanges();
+
+    let options = await page.findAll('modus-autocomplete >>> .options-container li');
+
+    await options[0].focus();
+    await page.waitForChanges();
+
+    await page.keyboard.press(' '); // Space
+    await page.waitForChanges();
+    expect(optionSelected).toHaveReceivedEvent();
+    expect(optionSelected).toHaveReceivedEventDetail(1);
+  });
+
+  it('should select the option by hitting Enter', async () => {
+    const element = await page.find('modus-autocomplete');
+    expect(element).toHaveClass('hydrated');
+
+    element.setProperty('disableCloseOnSelect', true);
+    element.setProperty('options', [
+      { id: 1, value: 'Test 1' },
+      { id: 2, value: 'Test 2' },
+    ]);
+    await page.waitForChanges();
+
+    const optionSelected = await page.spyOnEvent('optionSelected');
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await page.waitForChanges();
+
+    let options = await page.findAll('modus-autocomplete >>> .options-container li');
+
+    await options[1].focus();
+    await page.waitForChanges();
+
+    await page.keyboard.press('Enter');
+    await page.waitForChanges();
+    expect(optionSelected).toHaveReceivedEvent();
+    expect(optionSelected).toHaveReceivedEventDetail(2);
+  });
+
+  it('should focus first element when arrow key down is pressed', async () => {
+    const element = await page.find('modus-autocomplete');
+    expect(element).toHaveClass('hydrated');
+
+    element.setProperty('options', [
+      { id: 1, value: 'Test 1' },
+      { id: 2, value: 'Test 2' },
+    ]);
+    await page.waitForChanges();
+
+    const optionSelected = await page.spyOnEvent('optionSelected');
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    await page.keyboard.press('Enter');
+    await page.waitForChanges();
+
+    expect(optionSelected).toHaveReceivedEvent();
+    expect(optionSelected).toHaveReceivedEventDetail(1);
+  });
+
+  it('should focus second element when arrow key down is pressed twice', async () => {
+    const element = await page.find('modus-autocomplete');
+    expect(element).toHaveClass('hydrated');
+
+    element.setProperty('options', [
+      { id: 1, value: 'Test 1' },
+      { id: 2, value: 'Test 2' },
+    ]);
+    await page.waitForChanges();
+
+    const optionSelected = await page.spyOnEvent('optionSelected');
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    await page.keyboard.press('Enter');
+    await page.waitForChanges();
+
+    expect(optionSelected).toHaveReceivedEvent();
+    expect(optionSelected).toHaveReceivedEventDetail(2);
+  });
+
+  it('should focus first element when arrow key up is pressed', async () => {
+    const element = await page.find('modus-autocomplete');
+    expect(element).toHaveClass('hydrated');
+
+    element.setProperty('options', [
+      { id: 1, value: 'Test 1' },
+      { id: 2, value: 'Test 2' },
+    ]);
+    await page.waitForChanges();
+
+    const optionSelected = await page.spyOnEvent('optionSelected');
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    // Press Down Up
+    await page.keyboard.press('ArrowUp');
+    await page.waitForChanges();
+
+    await page.keyboard.press('Enter');
+    await page.waitForChanges();
+
+    expect(optionSelected).toHaveReceivedEvent();
+    expect(optionSelected).toHaveReceivedEventDetail(1);
+  });
+
+  it('should focus custom first element when arrow key down is pressed', async () => {
+    const page = await newE2EPage();
+    await page.setContent(`
+      <modus-autocomplete>
+        <li id="1" data-search-value="Test Option 1" data-id="1" style="padding: 8px">
+          <div style="font-weight: bold">Test Option 1</div>
+          <div style="font-size: 12px">Option Description</div>
+        </li>
+        <li id="2" data-search-value="Test Option 2" data-id="2" style="padding: 8px">
+          <div style="font-weight: bold">Test Option 2</div>
+          <div style="font-size: 12px">Option Description</div>
+        </li>
+      </modus-autocomplete>
+    `);
+    await page.waitForChanges();
+
+    const optionSelected = await page.spyOnEvent('optionSelected');
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    await page.keyboard.press('Enter');
+    await page.waitForChanges();
+
+    expect(optionSelected).toHaveReceivedEvent();
+    expect(optionSelected).toHaveReceivedEventDetail('1');
+  });
+
+  it('should focus custom second element when arrow key down is pressed twice', async () => {
+    const page = await newE2EPage();
+    await page.setContent(`
+      <modus-autocomplete>
+        <li id="1" data-search-value="Test Option 1" data-id="1" style="padding: 8px">
+          <div style="font-weight: bold">Test Option 1</div>
+          <div style="font-size: 12px">Option Description</div>
+        </li>
+        <li id="2" data-search-value="Test Option 2" data-id="2" style="padding: 8px">
+          <div style="font-weight: bold">Test Option 2</div>
+          <div style="font-size: 12px">Option Description</div>
+        </li>
+      </modus-autocomplete>
+    `);
+    await page.waitForChanges();
+
+    const optionSelected = await page.spyOnEvent('optionSelected');
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    await page.keyboard.press('Enter');
+    await page.waitForChanges();
+
+    expect(optionSelected).toHaveReceivedEvent();
+    expect(optionSelected).toHaveReceivedEventDetail('2');
+  });
+
+  it('should focus custom first element when arrow key up is pressed', async () => {
+    const page = await newE2EPage();
+    await page.setContent(`
+      <modus-autocomplete>
+        <li id="1" data-search-value="Test Option 1" data-id="1" style="padding: 8px">
+          <div style="font-weight: bold">Test Option 1</div>
+          <div style="font-size: 12px">Option Description</div>
+        </li>
+        <li id="2" data-search-value="Test Option 2" data-id="2" style="padding: 8px">
+          <div style="font-weight: bold">Test Option 2</div>
+          <div style="font-size: 12px">Option Description</div>
+        </li>
+      </modus-autocomplete>
+    `);
+    await page.waitForChanges();
+
+    const optionSelected = await page.spyOnEvent('optionSelected');
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    // Press Down Arrow
+    await page.keyboard.press('ArrowDown');
+    await page.waitForChanges();
+
+    // Press Down Up
+    await page.keyboard.press('ArrowUp');
+    await page.waitForChanges();
+
+    await page.keyboard.press('Enter');
+    await page.waitForChanges();
+
+    expect(optionSelected).toHaveReceivedEvent();
+    expect(optionSelected).toHaveReceivedEventDetail('1');
+  });
+
+  it('should add chip when option is selected and multiple is true', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('multiple', true);
+    await page.waitForChanges();
+
+    element.setProperty('options', ['Test 1']);
+    await page.waitForChanges();
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    const option = await page.find('modus-autocomplete >>> li');
+    await option.click();
+    await page.waitForChanges();
+
+    const chipsContainer = await page.find('modus-autocomplete >>> .chips-container');
+
+    const chips = await chipsContainer.findAll('modus-chip');
+
+    expect(chips.length).toEqual(1);
+
+    expect(await chips[0].getProperty('value')).toBe('Test 1');
+  });
+
+  it('should not add chip when multiple is false', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('multiple', false);
+    await page.waitForChanges();
+
+    element.setProperty('options', ['Test 1']);
+    await page.waitForChanges();
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    const option = await page.find('modus-autocomplete >>> li');
+    await option.click();
+    await page.waitForChanges();
+
+    const chipsContainer = await page.find('modus-autocomplete >>> .chips-container');
+
+    const chips = await chipsContainer.findAll('modus-chip');
+
+    expect(chips.length).toEqual(0);
+  });
+
+  it('should render clear button when clearable is true and there is a value', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('clearable', true);
+
+    element.setProperty('options', ['Test 1']);
+
+    await page.waitForChanges();
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    const option = await page.find('modus-autocomplete >>> li');
+    await option.click();
+    await page.waitForChanges();
+
+    const clearButton = await element.findAll('.icons-close');
+    expect(clearButton).not.toBeNull();
+  });
+
+  it('should not render clear button when clearable is false or there is no value', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('clearable', false);
+
+    element.setProperty('options', ['Test 1']);
+
+    await page.waitForChanges();
+
+    const textInput = await page.find('modus-autocomplete >>> modus-text-input');
+    await textInput.click();
+    await textInput.type('Test');
+    await page.waitForChanges();
+
+    const option = await page.find('modus-autocomplete >>> li');
+    await option.click();
+    await page.waitForChanges();
+
+    const clearButton = await element.findAll('.icons-close');
+    expect(clearButton).toEqual([]);
+  });
+
+  it('should disable the autocomplete when disabled is true', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('disabled', true);
+    await page.waitForChanges();
+
+    expect(await element.getProperty('disabled')).toBe(true);
+  });
+
+  it('should enable the autocomplete when disabled is false', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('disabled', false);
+    await page.waitForChanges();
+
+    expect(await element.getProperty('disabled')).toBe(false);
+  });
+
+  it('should display error message when there is an error', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('errorText', "This field can't be empty");
+    await page.waitForChanges();
+    const errorLabel = await page.findAll('modus-autocomplete >>> .error label');
+
+    expect(errorLabel.length).toEqual(1);
+  });
+
+  it('should not display error message when there is no error', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('errorText', '');
+    await page.waitForChanges();
+    const errorLabel = await page.findAll('modus-autocomplete >>> .error label');
+
+    expect(errorLabel.length).toEqual(0);
+  });
+
+  it('should include search icon when includeSearchIcon is true', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('includeSearchIcon', true);
+    await page.waitForChanges();
+
+    const searchIcon = await page.findAll('modus-autocomplete >>> .chips-container .icon-search');
+    expect(searchIcon.length).toEqual(1);
+  });
+
+  it('should not include search icon when includeSearchIcon is false', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('includeSearchIcon', false);
+    await page.waitForChanges();
+
+    const searchIcon = await page.findAll('modus-autocomplete >>> .chips-container .icon-search');
+    expect(searchIcon.length).toEqual(0);
+  });
+
+  it('should render label when label is provided', async () => {
+    const element = await page.find('modus-autocomplete');
+    const label = 'Select an option';
+    element.setProperty('label', label);
+    await page.waitForChanges();
+
+    const labelContainer = await page.findAll('modus-autocomplete >>> .label-container');
+    expect(labelContainer.length).toEqual(1);
+  });
+
+  it('should not render label when label is not provided', async () => {
+    const element = await page.find('modus-autocomplete');
+    element.setProperty('label', '');
+    await page.waitForChanges();
+
+    const labelContainer = await page.findAll('modus-autocomplete >>> .label-container');
+    expect(labelContainer.length).toEqual(0);
+  });
+
+  it('renders aria-label on alert div when set', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<modus-autocomplete aria-label="test label"></modus-autocomplete>');
+    let element = await page.find('modus-autocomplete >>> div.autocomplete');
+    expect(element).toBeDefined();
+    expect(element).toHaveAttribute('aria-label');
+    expect(element.getAttribute('aria-label')).toEqual('test label');
+  });
+
+  it('does not render aria-label on alert div when not set', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<modus-autocomplete></modus-autocomplete>');
+    let element = await page.find('modus-autocomplete >>> div.autocomplete');
+    expect(element).toBeDefined();
+    expect(element).not.toHaveAttribute('aria-label');
+  });
+
+  it('does not render aria-label on alert div when set to empty string', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<modus-autocomplete aria-label=""></modus-autocomplete>');
+    let element = await page.find('modus-autocomplete >>> div.autocomplete');
+    expect(element).toBeDefined();
+    expect(element).not.toHaveAttribute('aria-label');
+  });
 });

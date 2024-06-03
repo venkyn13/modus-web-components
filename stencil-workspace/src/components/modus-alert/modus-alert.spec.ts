@@ -10,10 +10,12 @@ describe('modus-alert', () => {
     expect(root).toEqualHtml(`
       <modus-alert type='none'>
         <mock:shadow-root>
-          <div class='alert undefined' role="alert">
+          <div class='alert' role="alert">
+            <div class="icon"></div>
             <div class='message'>
             <slot></slot>
             </div>
+            <div class="alert-buttons-container"></div>
           </div>
         </mock:shadow-root>
       </modus-alert>

@@ -1,6 +1,5 @@
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Component, Prop, State, h, Event, EventEmitter } from '@stencil/core';
-import { IconMap } from '../icons/IconMap';
 import {
   SMILEYS_TYPE_MAP,
   THUMBS_TYPE_MAP,
@@ -8,13 +7,15 @@ import {
   SMILEY_SENTIMENT_TYPE,
 } from './modus-sentiment-scale.constants';
 import { ModusSentimentScaleType } from './modus-sentiment-scale.models';
+import { SentimentIconMap } from './SentimentIconMap';
+
 @Component({
   tag: 'modus-sentiment-scale',
   styleUrl: 'modus-sentiment-scale.scss',
   shadow: true,
 })
 export class ModusSentimentScale {
-  /** (optional) The input's aria-label. */
+  /** (optional) The sentiment scale's aria-label. */
   @Prop() ariaLabel: string | null;
 
   /** The type of icons to be displayed. */
@@ -58,7 +59,11 @@ export class ModusSentimentScale {
 
     let containerClass = `${this.type + '-container'} ${this.disabled ? ' disabled' : ''}`;
     return (
-      <div class="sentiment-scale-container" role="group">
+      <div
+        class="sentiment-scale-container"
+        aria-disabled={this.disabled ? 'true' : undefined}
+        aria-label={this.ariaLabel || undefined}
+        role="group">
         {iconsMap &&
           Array.from(iconsMap).map(([key, value]) => {
             const isIconSelected = key === this.selected;
@@ -78,7 +83,7 @@ export class ModusSentimentScale {
                 class={containerClass}
                 onClick={() => this.handleSentimentClick(key)}
                 onKeyDown={(event) => this.handleKeyDown(event, key)}>
-                <IconMap icon={iconName} size={`${this.type === THUMB_SENTIMENT_TYPE ? '32' : '24'}`}></IconMap>
+                <SentimentIconMap icon={iconName} size={`${this.type === THUMB_SENTIMENT_TYPE ? '32' : '24'}`} />
               </div>
             );
           })}

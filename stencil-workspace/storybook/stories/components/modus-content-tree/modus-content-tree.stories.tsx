@@ -45,11 +45,27 @@ export default {
         defaultValue: { summary: `'standard'` },
         type: { summary: `'condensed' | 'standard' | 'large' ` },
       },
-    }
+    },
+    borderless: {
+      description:
+        'Whether the content tree and items have a border or not. Default is `false`.',
+      table: {
+        type: { summary: 'boolean' },
+      },
+    },
+    isLastChild:{
+      description: 'To be set true when the tree item is an expandable last child',
+      table: {
+        type: { summary: 'boolean' },
+      },
+    },
   },
   parameters: {
     docs: {
       page: docs,
+    },
+    actions: {
+      handles: ['itemActionClick modus-tree-view', 'actionClick modus-tree-view-item', 'itemClick modus-tree-view-item','itemLabelChange modus-tree-view-item'],
     },
     controls: { expanded: true, sort: 'requiredFirst' },
     options: {
@@ -60,6 +76,7 @@ export default {
 };
 
 const Template = ({
+  borderless,
   checkboxSelection,
   multiCheckboxSelection,
   multiSelection,
@@ -68,6 +85,7 @@ const Template = ({
 }) => html`
   <modus-tree-view
     style="width:400px;"
+    borderless=${borderless ? 'true' : 'false'}
     checkbox-selection=${checkboxSelection ? 'true' : 'false'}
     disable-tabbing=${disableTabbing ? 'true' : 'false'}
     multi-checkbox-selection=${multiCheckboxSelection ? 'true' : 'false'}
@@ -95,13 +113,16 @@ const Template = ({
 `;
 
 const SlotIconTemplate = ({
+  borderless,
   checkboxSelection,
   multiCheckboxSelection,
   multiSelection,
   disableTabbing,
   size,
+  isLastChild,
 }) => html`
   <modus-tree-view style="width:400px;"
+  borderless=${borderless ? 'true' : 'false'}
   checkbox-selection=${checkboxSelection ? 'true' : 'false'}
   disable-tabbing=${disableTabbing ? 'true' : 'false'}
   multi-checkbox-selection=${multiCheckboxSelection ? 'true' : 'false'}
@@ -121,13 +142,14 @@ const SlotIconTemplate = ({
       <modus-tree-view-item node-Id="2" label="Personal"></modus-tree-view-item>
       <modus-tree-view-item node-Id="3" label="Work"></modus-tree-view-item>
       <modus-tree-view-item node-Id="4" label="Social"></modus-tree-view-item>
-      <modus-tree-view-item node-Id="5" label="More ..."></modus-tree-view-item>
+      <modus-tree-view-item node-Id="5" is-last-child=${isLastChild} label="More ..."></modus-tree-view-item>
     </modus-tree-view-item>
   </modus-tree-view>
 `;
 
 export const Default = Template.bind({});
 Default.args = {
+  borderless: false,
   checkboxSelection: false,
   disableTabbing: false,
   multiCheckboxSelection: false,
@@ -144,6 +166,9 @@ WithIcon.args = {...Default.args,
 export const Condensed = Template.bind({});
 Condensed.args = { ...Default.args, checkboxSelection: true, size: 'condensed' };
 
+export const Borderless = Template.bind({});
+Borderless.args = { ...Default.args, borderless: true };
+
 export const MultiSelection = Template.bind({});
 MultiSelection.args = {...Default.args,
   multiSelection: true,
@@ -152,11 +177,13 @@ MultiSelection.args = {...Default.args,
 };
 
 const ActionBarTemplate = ({
+  borderless,
   checkboxSelection,
   multiCheckboxSelection,
   multiSelection,
   disableTabbing,
   size,
+  isLastChild,
 }) => html`
   <div
     id="tree-with-action-bar"
@@ -294,11 +321,13 @@ const ActionBarTemplate = ({
         </svg>
       </modus-button>
     </div>
-    <modus-tree-view checkbox-selection=${checkboxSelection ? 'true' : 'false'}
-    disable-tabbing=${disableTabbing ? 'true' : 'false'}
-    multi-checkbox-selection=${multiCheckboxSelection ? 'true' : 'false'}
-    multi-selection=${multiSelection ? 'true' : 'false'}
-    size=${size}>
+    <modus-tree-view
+      borderless=${borderless ? 'true' : 'false'}
+      checkbox-selection=${checkboxSelection ? 'true' : 'false'}
+      disable-tabbing=${disableTabbing ? 'true' : 'false'}
+      multi-checkbox-selection=${multiCheckboxSelection ? 'true' : 'false'}
+      multi-selection=${multiSelection ? 'true' : 'false'}
+      size=${size}>
       <modus-tree-view-item node-Id="1" label="Inbox">
         <modus-tree-view-item
           node-Id="2"
@@ -310,12 +339,13 @@ const ActionBarTemplate = ({
           label="More ..."></modus-tree-view-item>
       </modus-tree-view-item>
       <modus-tree-view-item node-Id="6" label="Archived">
-        <modus-tree-view-item node-Id="7" label="Folder1">
+        <modus-tree-view-item node-Id="7"  is-last-child=${isLastChild}  label="Folder1">
           <modus-tree-view-item
             node-Id="8"
             label="File1"></modus-tree-view-item>
           <modus-tree-view-item
             node-Id="9"
+            is-last-child=${isLastChild}
             label="File3"></modus-tree-view-item>
         </modus-tree-view-item>
       </modus-tree-view-item>
@@ -471,11 +501,13 @@ CustomActionBar.args = {...Default.args,
 };
 
 const FilterTemplate = ({
+  borderless,
   checkboxSelection,
   multiCheckboxSelection,
   multiSelection,
   disableTabbing,
   size,
+  isLastChild,
 }) => html`
   <div
     id="tree-with-filter"
@@ -484,13 +516,16 @@ const FilterTemplate = ({
       id="filter"
       size="large"
       placeholder="Search"
+      type="search"
       disabled="true"
       include-search-icon></modus-text-input>
-    <modus-tree-view checkbox-selection=${checkboxSelection ? 'true' : 'false'}
-    disable-tabbing=${disableTabbing ? 'true' : 'false'}
-    multi-checkbox-selection=${multiCheckboxSelection ? 'true' : 'false'}
-    multi-selection=${multiSelection ? 'true' : 'false'}
-    size=${size}>
+    <modus-tree-view
+      borderless=${borderless ? 'true' : 'false'}
+      checkbox-selection=${checkboxSelection ? 'true' : 'false'}
+      disable-tabbing=${disableTabbing ? 'true' : 'false'}
+      multi-checkbox-selection=${multiCheckboxSelection ? 'true' : 'false'}
+      multi-selection=${multiSelection ? 'true' : 'false'}
+      size=${size}>
       <modus-tree-view-item node-Id="1">
         <div slot="label">Inbox</div>
         <modus-tree-view-item node-Id="2">
@@ -502,12 +537,12 @@ const FilterTemplate = ({
       </modus-tree-view-item>
       <modus-tree-view-item node-Id="6">
         <div slot="label">Archived</div>
-        <modus-tree-view-item node-Id="7">
+        <modus-tree-view-item is-last-child=${isLastChild} node-Id="7">
           <div slot="label">Folder1</div>
           <modus-tree-view-item node-Id="8">
             <div slot="label">File1</div>
           </modus-tree-view-item>
-          <modus-tree-view-item node-Id="11">
+          <modus-tree-view-item is-last-child=${isLastChild} node-Id="11">
             <div slot="label">File2</div>
           </modus-tree-view-item>
         </modus-tree-view-item>
@@ -591,3 +626,39 @@ export const CustomFilter = FilterTemplate.bind({});
 CustomFilter.args = {...Default.args,
 };
 
+const WithItemActionBarTemplate = ({
+  borderless,
+  checkboxSelection,
+  multiCheckboxSelection,
+  multiSelection,
+  size,
+  rowActions,
+}) => html`
+  <div
+    style="display: flex; flex-direction: column; width: 400px;">
+    <modus-tree-view
+      style="width:400px;"
+      borderless=${borderless}
+      checkbox-selection=${checkboxSelection}
+      checked-items="false"
+      expanded-items="false"
+      multi-checkbox-selection=${multiCheckboxSelection}
+      multi-selection=${multiSelection}
+      selected-items="false"
+      size=${size}
+    >
+      <modus-tree-view-item node-id="1" label="Inbox" .actions=${rowActions}></modus-tree-view-item>
+    </modus-tree-view>
+  </div>
+`;
+
+export const WithActionBar = WithItemActionBarTemplate.bind({});
+WithActionBar.args = {
+  ...Default.args,
+  rowActions: [
+    { id: 'export', icon: 'export', label: 'Export' },
+    { id: 'history', icon: 'history', label: 'History' },
+    { id: 'edit', icon: 'pencil', label: 'Edit' },
+    { id: 'delete', icon: 'delete', label: 'Delete' }
+    ]
+};

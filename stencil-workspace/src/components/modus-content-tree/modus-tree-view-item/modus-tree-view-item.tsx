@@ -6,13 +6,15 @@ import {
   Element,
   Event,
   EventEmitter,
+  Listen,
   Method,
   Watch,
   FunctionalComponent,
 } from '@stencil/core';
-import { IconMap } from '../../icons/IconMap';
+import { ModusIconMap } from '../../../icons/ModusIconMap';
 import { TreeViewItemOptions } from '../modus-content-tree.types';
 import { TREE_ITEM_SIZE_CLASS } from '../modus-content-tree.constants';
+import { ModusActionBarOptions } from '../../modus-action-bar/modus-action-bar';
 
 /**
  * @slot collapseIcon - Slot for custom collapse icon
@@ -32,6 +34,9 @@ export class ModusTreeViewItem {
 
   /** An event that fires on tree item checkbox click */
   @Event() checkboxClick: EventEmitter<boolean>;
+
+  /** An event that fires on tree item label changes */
+  @Event() itemLabelChange: EventEmitter<string>;
 
   /** (optional) Disables the tree item */
   @Prop() disabled: boolean;
@@ -60,10 +65,32 @@ export class ModusTreeViewItem {
   /** (optional) Tab Index for the tree item */
   @Prop({ mutable: true }) tabIndexValue: string | number = 0;
 
+  /** (optional) Actions that can be performed on each item. A maximum of 3 icons will be shown, including overflow menu and expand icons. */
+  @Prop({ mutable: true }) actions: ModusActionBarOptions[];
+
+  /** To be set true when the tree item is an expandable last child */
+  @Prop() isLastChild: boolean;
+
+  @State() isExpanded: boolean;
+  @State() isChildren: boolean;
+
+  @Listen('actionBarClick')
+  handleActionBarClick(event: CustomEvent) {
+    const actionId = event.detail.actionId;
+    this.actionClick.emit({ actionId });
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
   /**
    * @internal
    */
   @Event() itemAdded: EventEmitter<HTMLElement>;
+
+  /**
+   * Fired when an action button within the tree item is clicked. Includes the `actionId`.
+   */
+  @Event() actionClick: EventEmitter;
 
   @State() childrenIds: string[];
   @State() forceUpdate = {};
@@ -111,6 +138,15 @@ export class ModusTreeViewItem {
     if (this.refLabelInput && this.editable) {
       this.refLabelInput.focusInput();
     }
+    const children = this.element.querySelectorAll('modus-tree-view-item') as unknown as HTMLModusTreeViewItemElement[];
+    children.forEach((child) => {
+      child.setChildren();
+    });
+  }
+
+  @Method()
+  async setChildren() {
+    this.isChildren = true;
   }
 
   componentWillLoad() {
@@ -188,6 +224,7 @@ export class ModusTreeViewItem {
       const { onItemExpandToggle, hasItemExpanded } = this.options;
 
       onItemExpandToggle(this.nodeId);
+      this.isExpanded = hasItemExpanded(this.nodeId);
       this.itemExpandToggle.emit(hasItemExpanded(this.nodeId));
     }
   }
@@ -200,6 +237,10 @@ export class ModusTreeViewItem {
   }
 
   handleItemClick(e?: KeyboardEvent | MouseEvent): void {
+    if (e.defaultPrevented) {
+      return;
+    }
+
     if (this.shouldHandleEvent(e)) {
       const { onItemSelection, hasItemSelected } = this.options;
 
@@ -237,6 +278,7 @@ export class ModusTreeViewItem {
     switch (e.code) {
       case 'Enter':
         e.preventDefault();
+        this.itemLabelChange.emit(this.refLabelInput.value);
         this.updateLabelInput();
         break;
     }
@@ -299,6 +341,7 @@ export class ModusTreeViewItem {
         multiCheckboxSelection,
         showSelectionIndicator,
         size,
+        borderless,
         getLevel,
         hasItemSelected,
         hasItemDisabled,
@@ -324,6 +367,7 @@ export class ModusTreeViewItem {
         checkboxSelection,
         multiCheckboxSelection,
         size,
+        borderless,
         isDisabled,
         selectionIndicator,
       };
@@ -333,7 +377,7 @@ export class ModusTreeViewItem {
       };
   }
 
-  shouldHandleEvent(e?: Event) {
+  shouldHandleEvent(e?: Event): boolean {
     if (e) e.stopPropagation();
     // Do not handle the event when the item is disabled
     return this.options && !this.options.hasItemDisabled(this.nodeId);
@@ -366,6 +410,7 @@ export class ModusTreeViewItem {
       checkboxSelection,
       multiCheckboxSelection,
       size,
+      borderless,
       isDisabled,
       selectionIndicator,
     } = this.rootOptions();
@@ -379,7 +424,7 @@ export class ModusTreeViewItem {
     };
     const sizeClass = `${TREE_ITEM_SIZE_CLASS.get(size || 'standard')}`;
     const tabIndex: string | number = isDisabled ? -1 : this.tabIndexValue;
-    const treeItemClass = `tree-item ${selected ? 'selected' : ''} ${sizeClass} ${isDisabled ? 'disabled' : ''} `;
+    const treeItemClass = `tree-item ${this.isExpanded ? 'expanded' : ''} ${this.isChildren ? 'is-children' : ''} ${this.isLastChild && !this.isExpanded ? 'is-last-child' : ''}${selected ? 'selected' : ''} ${sizeClass} ${isDisabled ? 'disabled' : ''} ${borderless ? 'borderless' : ''}`;
     const treeItemChildrenClass = `tree-item-group ${sizeClass} ${expanded ? 'expanded' : ''}`;
 
     return (
@@ -393,7 +438,7 @@ export class ModusTreeViewItem {
           tabindex={tabIndex}>
           <this.CustomSlot
             className={`icon-slot drag-icon${!this.draggableItem ? ' hidden' : ''}`}
-            defaultContent={<IconMap icon="drag" />}
+            defaultContent={<ModusIconMap icon="drag_indicator" />}
             name={this.SLOT_DRAG_ICON}
             onMouseDown={(e) => this.handleDrag(e)}
           />
@@ -407,13 +452,13 @@ export class ModusTreeViewItem {
             tabindex={expandable ? tabIndex : -1}>
             <this.CustomSlot
               className="inline-flex rotate-right"
-              defaultContent={<IconMap icon="chevron-down-thick" size="24" />}
+              defaultContent={<ModusIconMap icon="expand_more" size="24" />}
               display={!expanded}
               name={this.SLOT_EXPAND_ICON}
             />
             <this.CustomSlot
               className="inline-flex"
-              defaultContent={<IconMap icon="chevron-down-thick" size="24" />}
+              defaultContent={<ModusIconMap icon="expand_more" size="24" />}
               display={expanded}
               name={this.SLOT_COLLAPSE_ICON}
             />
@@ -427,8 +472,7 @@ export class ModusTreeViewItem {
                 indeterminate={indeterminate}
                 onClick={(e) => this.handleCheckboxClick(e)}
                 onKeyDown={(e) => this.handleDefaultKeyDown(e, () => this.handleCheckboxClick(e))}
-                ref={(el) => (this.refCheckbox = el)}
-                tabIndexValue={tabIndex}></modus-checkbox>
+                ref={(el) => (this.refCheckbox = el)}></modus-checkbox>
             </div>
           )}
 
@@ -453,6 +497,8 @@ export class ModusTreeViewItem {
                 )
               }></this.CustomSlot>
           </div>
+
+          {this.actions?.length > 0 && <modus-action-bar visible-item-count={3} actions={this.actions}></modus-action-bar>}
         </div>
         <ul class={treeItemChildrenClass} role="tree">
           <slot onSlotchange={() => this.handleTreeSlotChange()} />

@@ -13,6 +13,7 @@
 | `columnResize`            | `column-resize`           |                                                                                                                                                                                       | `boolean`                                 | `false`                                                   |
 | `columns` _(required)_    | --                        | (Required) To display headers in the table.                                                                                                                                           | `ModusTableColumn<unknown, unknown>[]`    | `undefined`                                               |
 | `data` _(required)_       | --                        | (Required) To display data in the table.                                                                                                                                              | `unknown[]`                               | `undefined`                                               |
+| `defaultSort`             | --                        | (Optional) To set the default sorting for the table.                                                                                                                                  | `ColumnSort`                              | `undefined`                                               |
 | `density`                 | `density`                 | (optional) The density of the table.                                                                                                                                                  | `"comfortable" \| "compact" \| "relaxed"` | `'relaxed'`                                               |
 | `displayOptions`          | --                        | (Optional) To control display options of table.                                                                                                                                       | `ModusTableDisplayOptions`                | `{     borderless: false,     cellBorderless: false,   }` |
 | `fullWidth`               | `full-width`              |                                                                                                                                                                                       | `boolean`                                 | `false`                                                   |
@@ -29,9 +30,11 @@
 | `rowsExpandable`          | `rows-expandable`         | (Optional) To display expanded rows.                                                                                                                                                  | `boolean`                                 | `false`                                                   |
 | `showSortIconOnHover`     | `show-sort-icon-on-hover` | (Optional) To display sort icon on hover.                                                                                                                                             | `boolean`                                 | `false`                                                   |
 | `sort`                    | `sort`                    | (Optional) To sort data in table.                                                                                                                                                     | `boolean`                                 | `false`                                                   |
+| `sortIconStyle`           | `sort-icon-style`         | (Optional) To display a-z or arrow sort icons.                                                                                                                                        | `"alphabetical" \| "directional"`         | `'alphabetical'`                                          |
 | `summaryRow`              | `summary-row`             | (Optional) To display summary row.                                                                                                                                                    | `boolean`                                 | `false`                                                   |
 | `toolbar`                 | `toolbar`                 | (Optional) To display a toolbar for the table.                                                                                                                                        | `boolean`                                 | `false`                                                   |
 | `toolbarOptions`          | --                        | (Optional) To display a toolbar, which allows access to table operations like hiding columns.                                                                                         | `ModusTableToolbarOptions`                | `null`                                                    |
+| `wrapText`                | `wrap-text`               | (Optional) To wrap text that overflows the cell.                                                                                                                                      | `boolean`                                 | `false`                                                   |
 
 
 ## Events
@@ -56,6 +59,12 @@
 
 Returns data of a column.
 
+#### Parameters
+
+| Name          | Type     | Description           |
+| ------------- | -------- | --------------------- |
+| `accessorKey` | `string` | : Column name as key. |
+
 #### Returns
 
 Type: `Promise<unknown[]>`
@@ -65,6 +74,13 @@ Type: `Promise<unknown[]>`
 ### `toggleColumnVisibility(columnId: string, show: boolean) => Promise<void>`
 
 Toggle the table column visibility
+
+#### Parameters
+
+| Name       | Type      | Description                                   |
+| ---------- | --------- | --------------------------------------------- |
+| `columnId` | `string`  | Column id                                     |
+| `show`     | `boolean` | Boolean value decides to visibility of column |
 
 #### Returns
 
@@ -125,6 +141,7 @@ graph TD;
   modus-table-cell-editor --> modus-date-input
   modus-table-cell-editor --> modus-autocomplete
   modus-autocomplete --> modus-text-input
+  modus-autocomplete --> modus-chip
   style modus-table fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

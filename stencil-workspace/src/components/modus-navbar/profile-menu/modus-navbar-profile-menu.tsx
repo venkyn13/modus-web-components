@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 import { Component, Prop, h, Event, EventEmitter } from '@stencil/core';
 import { ModusNavbarProfileMenuLink } from '../modus-navbar.models';
-import { IconMap } from '../../icons/IconMap';
+import { ModusIconMap } from '../../../icons/ModusIconMap';
 
 @Component({
   tag: 'modus-navbar-profile-menu',
@@ -13,6 +13,7 @@ export class ModusNavbarProfileMenu {
   @Prop() email: string;
   @Prop() initials: string;
   @Prop() links: ModusNavbarProfileMenuLink[];
+  @Prop() signOutText = 'Sign out';
   @Prop() reverse: boolean;
   @Prop() username: string;
   @Prop() variant: 'default' | 'blue' = 'default';
@@ -39,7 +40,7 @@ export class ModusNavbarProfileMenu {
           ) : (
             <span class="initials">{this.initials}</span>
           )}
-          <div>
+          <div class="user-details">
             <div class="username">{this.username}</div>
             <div class="email">{this.email}</div>
           </div>
@@ -52,7 +53,7 @@ export class ModusNavbarProfileMenu {
                   <div class="link-item">
                     {link.icon && (
                       <div class="icon">
-                        <IconMap icon={link.icon} size="24" />
+                        <ModusIconMap icon={link.icon} size="24" />
                       </div>
                     )}
                     {link.display}
@@ -68,7 +69,7 @@ export class ModusNavbarProfileMenu {
           onClick={() => this.signOutClick.emit()}
           onKeyDown={(event) => this.signOutKeydownHandler(event)}
           tabIndex={0}>
-          <div>Sign out</div>
+          <div>{this.signOutText}</div>
         </div>
       </div>
     );

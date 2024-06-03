@@ -1,9 +1,29 @@
 @import './modus-table.vars';
 
+.cell-contents {
+  align-items: center;
+  display: flex;
+  gap: 0.25rem;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.column-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sort-icon {
+  flex-shrink: 0;
+}
+
 .table-container {
   border: $rem-1px $modus-table-border-color solid;
   display: flex;
   overflow: auto;
+  position: relative;
+  z-index: 0;
 
   &::-webkit-scrollbar {
     height: 0.75em;
@@ -46,8 +66,12 @@ table {
     box-sizing: border-box;
 
     &.row-checkbox {
-      padding: 0.5rem !important;
+      padding: 0.5rem;
       width: 46px;
+
+      &.small {
+        width: 38px;
+      }
     }
 
     &:last-child {
@@ -63,13 +87,15 @@ table {
   thead {
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 99;
 
     &.show-resize-cursor {
       th {
         cursor: e-resize;
 
         .can-sort {
+          cursor: e-resize;
+
           .sort-icon-container {
             cursor: e-resize;
           }
@@ -91,6 +117,7 @@ table {
 
     tr {
       color: $modus-table-header-color;
+      height: $rem-48px;
 
       th {
         background-color: $modus-table-header-bg;
@@ -98,16 +125,34 @@ table {
         box-shadow: inset 0 -0.5px 0 $modus-table-border-color;
         font-weight: $font-weight-semi-bold;
         overflow: hidden;
-        padding: $rem-8px $rem-8px $rem-8px $rem-16px;
+        padding: $rem-6px $rem-8px $rem-6px $rem-16px;
         position: relative;
+
+        &.row-checkbox {
+          padding: $rem-4px $rem-8px;
+        }
+
+        &.header-base {
+          outline: -webkit-focus-ring-color auto 1px;
+        }
 
         .can-sort {
           align-items: center;
           display: flex;
           justify-content: space-between;
 
-          .sort-icon-container {
+          .sorted {
+            font-weight: bold;
+          }
+
+          .header-text,
+          .sort-icon {
             cursor: pointer;
+            padding: 0;
+          }
+
+          .sort-icon-container {
+            margin-left: 8px;
             padding: $rem-2px $rem-2px 0;
 
             .sort-icon {
@@ -154,20 +199,27 @@ table {
           cursor: e-resize;
           height: 100%;
           position: absolute;
-          right: 0;
+          right: -7px;
           top: 0;
           touch-action: none;
           user-select: none;
-          width: $rem-3px;
+          width: 13px;
+          z-index: 11;
         }
 
         &:not(.active-resize) {
           .resize-handle:focus-visible {
-            border-right: 2px solid $modus-table-header-color;
+            + .resize-handle-border {
+              border-right: 2px solid $modus-table-header-color;
+              height: 100%;
+              position: absolute;
+              right: -1px;
+              top: 0;
+            }
           }
         }
 
-        &:has(modus-tooltip:hover) {
+        &:has(modus-tooltip) {
           // On hover of child, parent overflow property is changed.
           overflow: visible;
         }
@@ -191,15 +243,31 @@ table {
     tr {
       color: $modus-table-body-color;
 
-      .wrap-text {
+      .truncate-text,
+      .truncate-text .cell-link {
         overflow: hidden;
         text-overflow: ellipsis;
-        text-wrap: nowrap;
+        white-space: nowrap;
+      }
+
+      .wrap-text {
+        overflow-wrap: break-word;
+        word-break: break-word;
       }
 
       td {
         background-color: $modus-table-body-bg;
         border-top: $rem-1px $modus-table-border-color solid;
+
+        // density-relaxed
+        padding-bottom: $rem-14px;
+        padding-top: $rem-14px;
+        vertical-align: top;
+
+        &.row-checkbox {
+          padding-bottom: $rem-12px;
+          padding-top: $rem-12px;
+        }
 
         &.edit-mode {
           border: $rem-2px $modus-table-cell-border-color solid;
@@ -332,6 +400,15 @@ table {
       }
     }
 
+    th {
+      position: relative;
+
+      div {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
     &.row-selected {
       background-color: $modus-table-selected-bg;
 
@@ -350,21 +427,87 @@ table {
   }
 
   &.density-relaxed {
+    thead {
+      tr {
+        height: $rem-48px;
+
+        th {
+          padding-bottom: $rem-6px;
+          padding-top: $rem-6px;
+
+          &.row-checkbox {
+            padding: $rem-4px $rem-8px;
+          }
+
+          .can-sort {
+            .sort-icon-container {
+              padding: 0;
+            }
+          }
+        }
+      }
+    }
+
     tbody {
       tr {
+        height: $rem-48px;
+      }
+    }
+
+    tfoot {
+      .summary-row {
         height: $rem-48px;
       }
     }
   }
 
   &.density-comfortable {
+    thead {
+      tr {
+        height: 32px;
+
+        th {
+          padding-bottom: $rem-6px;
+          padding-top: $rem-6px;
+
+          &.row-checkbox {
+            padding: $rem-4px $rem-8px;
+          }
+
+          .can-sort {
+            .sort-icon-container {
+              padding: 0;
+            }
+          }
+        }
+      }
+    }
+
     tbody {
       tr {
         height: $rem-32px;
 
         td {
+          padding-bottom: $rem-6px;
+          padding-top: $rem-6px;
+
           &.row-checkbox {
-            padding: $rem-2px $rem-8px !important;
+            padding: $rem-4px $rem-8px;
+          }
+        }
+      }
+    }
+
+    tfoot {
+      .summary-row {
+        height: $rem-32px;
+
+        td {
+          padding-bottom: $rem-6px;
+          padding-top: $rem-6px;
+
+          &.row-checkbox {
+            padding: $rem-4px $rem-8px;
           }
         }
       }
@@ -372,16 +515,52 @@ table {
   }
 
   &.density-compact {
+    thead {
+      tr {
+        height: $rem-24px;
+
+        th {
+          padding-bottom: $rem-2px;
+          padding-top: $rem-2px;
+
+          &.row-checkbox {
+            padding: $rem-2px $rem-8px;
+          }
+
+          .can-sort {
+            .sort-icon-container {
+              padding: 0;
+            }
+          }
+        }
+      }
+    }
+
     tbody {
       tr {
         height: $rem-24px;
+
+        td {
+          padding-bottom: $rem-4px;
+          padding-top: $rem-4px;
+
+          &.row-checkbox {
+            padding: $rem-2px $rem-8px;
+          }
+        }
+      }
+    }
+
+    tfoot {
+      .summary-row {
+        height: 24px;
 
         td {
           padding-bottom: $rem-2px;
           padding-top: $rem-2px;
 
           &.row-checkbox {
-            padding: $rem-2px $rem-8px !important;
+            padding: $rem-4px $rem-8px;
           }
         }
       }

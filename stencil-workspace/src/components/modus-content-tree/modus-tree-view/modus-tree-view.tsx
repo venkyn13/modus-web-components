@@ -1,6 +1,8 @@
 import {
   Component,
   Element,
+  Event,
+  EventEmitter,
   h, // eslint-disable-line @typescript-eslint/no-unused-vars
   Host,
   Listen,
@@ -42,6 +44,9 @@ export class ModusTreeView {
 
   /** (optional) The default size of all tree items */
   @Prop() size: 'condensed' | 'large' | 'standard' = 'standard';
+
+  /** (optional) Whether the content tree and items have a border or not */
+  @Prop() borderless: boolean;
 
   @State() itemDragState: TreeViewItemDragState;
 
@@ -169,12 +174,18 @@ export class ModusTreeView {
   @Watch('multiCheckboxSelection')
   @Watch('multiSelection')
   @Watch('size')
+  @Watch('borderless')
   handleOptionsProps() {
     const options = this.getTreeViewItemOptions();
     Object.values(this.items).forEach(({ element }) => {
       element.initTreeViewItem(options);
     });
   }
+
+  /**
+   * Fired when an action is clicked within any tree item. Includes both the `actionId` and `nodeId` of the action and item, respectively.
+   */
+  @Event() itemActionClick: EventEmitter;
 
   handleTreeSlotChange() {
     const childrenAtRoot = Array.from(this.element.children as unknown as HTMLModusTreeViewItemElement[])
@@ -366,6 +377,7 @@ export class ModusTreeView {
       checkboxSelection: this.checkboxSelection,
       multiCheckboxSelection: this.multiCheckboxSelection,
       size: this.size,
+      borderless: this.borderless,
       disableTabbing: this.disableTabbing,
 
       getLevel: (id) => this.getLevel(id),
@@ -444,6 +456,13 @@ export class ModusTreeView {
 
     event.preventDefault();
     event.stopPropagation();
+  }
+
+  @Listen('actionClick')
+  handleItemClick(event: CustomEvent) {
+    const actionId = event.detail.actionId;
+    const nodeId = (event.target as HTMLElement).getAttribute('node-id');
+    this.itemActionClick.emit({ actionId, nodeId });
   }
 
   handleItemExpand(itemId: string): void {

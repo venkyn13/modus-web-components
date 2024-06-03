@@ -159,7 +159,7 @@ export default {
 };
 
 const defaultArgs = {
-  ariaLabel: 'Date Input',
+  ariaLabel: '',
   allowedCharsRegex: '[\\d\\/]',
   altFormats: '',
   autoFocusInput: true,
@@ -207,7 +207,7 @@ const DefaultTemplate = ({
     aria-label=${ariaLabel}
     auto-focus-input=${autoFocusInput}
     disable-validation=${disableValidation}
-    disabled=${disabled}
+    ?disabled=${disabled}
     error-text=${errorText}
     format=${format}
     helper-text=${helperText}
@@ -216,7 +216,7 @@ const DefaultTemplate = ({
     max=${max}
     placeholder=${placeholder}
     read-only=${readOnly}
-    required=${required}
+    ?required=${required}
     size=${size}
     show-calendar-icon=${showCalendarIcon}
     valid-text=${validText}
@@ -259,7 +259,7 @@ const DateRangeTemplate = ({
       aria-label=${ariaLabel}
       auto-focus-input=${autoFocusInput}
       disable-validation=${disableValidation}
-      disabled=${disabled}
+      ?disabled=${disabled}
       error-text=${errorText}
       format=${format}
       min=${min}
@@ -269,7 +269,7 @@ const DateRangeTemplate = ({
       label="Start"
       placeholder=${placeholder}
       read-only=${readOnly}
-      required=${required}
+      ?required=${required}
       size=${size}
       show-calendar-icon=${showCalendarIcon}
       valid-text=${validText}
@@ -281,7 +281,7 @@ const DateRangeTemplate = ({
       aria-label=${ariaLabel}
       auto-focus-input=${autoFocusInput}
       disable-validation=${disableValidation}
-      disabled=${disabled}
+      ?disabled=${disabled}
       error-text=${errorText}
       format=${format}
       min=${min}
@@ -291,7 +291,7 @@ const DateRangeTemplate = ({
       label="End"
       placeholder=${placeholder}
       read-only=${readOnly}
-      required=${required}
+      ?required=${required}
       size=${size}
       show-calendar-icon=${showCalendarIcon}
       valid-text=${validText}
@@ -312,6 +312,7 @@ DateRange.args = {
 const DefaultWithPickerTemplate = ({
     ariaLabel,
     allowedCharsRegex,
+    altFormats,
     autoFocusInput,
     disableValidation,
     disabled,
@@ -333,9 +334,10 @@ const DefaultWithPickerTemplate = ({
     <modus-date-input
       allowed-chars-regex=${allowedCharsRegex}
       aria-label=${ariaLabel}
+      alt-formats=${altFormats}
       auto-focus-input=${autoFocusInput}
       disable-validation=${disableValidation}
-      disabled=${disabled}
+      ?disabled=${disabled}
       error-text=${errorText}
       format=${format}
       helper-text=${helperText}
@@ -344,7 +346,7 @@ const DefaultWithPickerTemplate = ({
       max=${max}
       placeholder=${placeholder}
       read-only=${readOnly}
-      required=${required}
+      ?required=${required}
       size=${size}
       show-calendar-icon=${showCalendarIcon}
       valid-text=${validText}

@@ -2,12 +2,86 @@ import { newE2EPage } from '@stencil/core/testing';
 import { ModusNavbarButton } from './modus-navbar.models';
 
 describe('modus-navbar', () => {
-  it('renders', async () => {
+  it('renders default navbar state', async () => {
     const page = await newE2EPage();
 
     await page.setContent('<modus-navbar></modus-navbar>');
     const element = await page.find('modus-navbar');
     expect(element).toHaveClass('hydrated');
+
+    const profileMenuButton = await page.find('modus-navbar >>> .profile-menu');
+    expect(profileMenuButton).toBeTruthy();
+    await profileMenuButton.click();
+    await page.waitForChanges();
+
+    const navbarprofileMenu = await page.find('modus-navbar >>> modus-navbar-profile-menu');
+    const signOut = await navbarprofileMenu.shadowRoot.querySelector('.profile-menu > .sign-out');
+    expect(signOut.textContent).toContain('Sign out');
+  });
+
+  it('should not render aria-label on help tooltip when not provided', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-profile></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const profileMenuIcon = await page.find('modus-navbar >>> .profile-menu');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('profileMenuOptions', { tooltip: { text: 'Profile' } });
+    await page.waitForChanges();
+
+    const tooltip = await profileMenuIcon.find('modus-tooltip >>> .tooltip');
+
+    expect(tooltip.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should not render aria-label on help tooltip when empty string provided', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-profile></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const profileMenuIcon = await page.find('modus-navbar >>> .profile-menu');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('profileMenuOptions', { tooltip: { ariaLabel: '', text: 'Profile' } });
+    await page.waitForChanges();
+
+    const tooltip = await profileMenuIcon.find('modus-tooltip >>> .tooltip');
+
+    expect(tooltip.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should render aria-label on help tooltip when empty string provided', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-profile></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const profileMenuIcon = await page.find('modus-navbar >>> .profile-menu');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('profileMenuOptions', { tooltip: { ariaLabel: 'test label', text: 'Profile' } });
+    await page.waitForChanges();
+
+    const tooltip = await profileMenuIcon.find('modus-tooltip >>> .tooltip');
+
+    expect(tooltip.getAttribute('aria-label')).toEqual('test label');
+  });
+
+  it('renders change to signOutText', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<modus-navbar></modus-navbar>');
+    const component = await page.find('modus-navbar');
+    component.setProperty('profileMenuOptions', { signOutText: 'Log out' });
+    await page.waitForChanges();
+
+    const profileMenuButton = await page.find('modus-navbar >>> .profile-menu');
+    await profileMenuButton.click();
+    await page.waitForChanges();
+
+    const navbarprofileMenu = await page.find('modus-navbar >>> modus-navbar-profile-menu');
+    const signOut = await navbarprofileMenu.shadowRoot.querySelector('.profile-menu > .sign-out');
+    expect(signOut.textContent).toContain('Log out');
   });
 
   it('shows shadow when showShadow is true', async () => {
@@ -195,6 +269,54 @@ describe('modus-navbar', () => {
 
     const tooltipText = await page.$eval('modus-navbar >>> modus-tooltip >>> .tooltip', (tooltip) => tooltip.textContent);
     expect(tooltipText).toBe('Search');
+  });
+
+  it('should not render aria-label on search tooltip when not provided', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-search></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const searchIcon = await page.find('modus-navbar >>> .search');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('searchTooltip', { text: 'Search' });
+    await page.waitForChanges();
+
+    const tooltip = await searchIcon.find('modus-tooltip >>> .tooltip');
+
+    expect(tooltip.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should not render aria-label on search tooltip when empty string provided', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-search></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const searchIcon = await page.find('modus-navbar >>> .search');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('searchTooltip', { text: 'Search', ariaLabel: '' });
+    await page.waitForChanges();
+
+    const tooltip = await searchIcon.find('modus-tooltip >>> .tooltip');
+
+    expect(tooltip.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should render aria-label on search tooltip when empty string provided', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-search></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const searchIcon = await page.find('modus-navbar >>> .search');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('searchTooltip', { text: 'Search', ariaLabel: 'test label' });
+    await page.waitForChanges();
+
+    const tooltip = await searchIcon.find('modus-tooltip >>> .tooltip');
+
+    expect(tooltip.getAttribute('aria-label')).toEqual('test label');
   });
 
   it('should show searchoverlay on search button click', async () => {
@@ -438,5 +560,107 @@ describe('modus-navbar', () => {
     await page.waitForChanges();
 
     expect(profileMenuSignOutClickEvent).toHaveReceivedEvent();
+  });
+
+  it('should hide profile avatar', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<modus-navbar show-profile="false"></modus-navbar>');
+    await page.waitForChanges();
+
+    const profileMenuButton = await page.find('modus-navbar >>> .profile-menu');
+    expect(profileMenuButton).toBeNull();
+  });
+
+  it('should show tooltip on hover of help icon', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-help></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const helpIcon = await page.find('modus-navbar >>> [data-test-id="help-menu"]');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('helpTooltip', { text: 'Resource Center' });
+    await page.waitForChanges();
+
+    const tooltip = await helpIcon.find('modus-tooltip >>> .tooltip');
+    expect(tooltip.getAttribute('data-show')).toBeNull();
+
+    await helpIcon.hover();
+    await page.waitForChanges();
+
+    await new Promise((r) => setTimeout(r, 500));
+    expect(tooltip.getAttribute('data-show')).not.toBeNull();
+
+    const tooltipText = await page.$eval('modus-navbar >>> modus-tooltip >>> .tooltip', (tooltip) => tooltip.textContent);
+    expect(tooltipText).toBe('Resource Center');
+  });
+
+  it('should have aria-label when provided', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<modus-navbar nav-aria-label="test"></modus-navbar>');
+    await page.waitForChanges();
+
+    const navElement = await page.find('modus-navbar >>> nav');
+    expect(navElement.getAttribute('aria-label')).toEqual('test');
+  });
+
+  it('should not have aria-label when not provided', async () => {
+    const page = await newE2EPage();
+
+    await page.setContent('<modus-navbar></modus-navbar>');
+    await page.waitForChanges();
+
+    const navElement = await page.find('modus-navbar >>> nav');
+    expect(navElement.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should not render aria-label on help tooltip when not provided', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-help></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const helpIcon = await page.find('modus-navbar >>> [data-test-id="help-menu"]');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('helpTooltip', { text: 'Resource Center' });
+    await page.waitForChanges();
+
+    const tooltip = await helpIcon.find('modus-tooltip >>> .tooltip');
+
+    expect(tooltip.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should not render aria-label on help tooltip when empty string provided', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-help></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const helpIcon = await page.find('modus-navbar >>> [data-test-id="help-menu"]');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('helpTooltip', { ariaLabel: '', text: 'Resource Center' });
+    await page.waitForChanges();
+
+    const tooltip = await helpIcon.find('modus-tooltip >>> .tooltip');
+
+    expect(tooltip.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('should render aria-label on help tooltip when empty string provided', async () => {
+    const page = await newE2EPage();
+    await page.setContent('<modus-navbar show-help></modus-navbar>');
+
+    await page.waitForChanges();
+
+    const helpIcon = await page.find('modus-navbar >>> [data-test-id="help-menu"]');
+    const navbar = await page.find('modus-navbar');
+    navbar.setProperty('helpTooltip', { ariaLabel: 'test label', text: 'Resource Center' });
+    await page.waitForChanges();
+
+    const tooltip = await helpIcon.find('modus-tooltip >>> .tooltip');
+
+    expect(tooltip.getAttribute('aria-label')).toEqual('test label');
   });
 });

@@ -1,6 +1,7 @@
 @import './modus-text-input.vars';
 
 .modus-text-input {
+  border-radius: 4px;
   display: inline-flex;
   flex-direction: column;
   font-family: $primary-font;
@@ -33,6 +34,7 @@
     background-color: $modus-input-bg;
     border: $rem-1px solid $modus-input-border-color;
     border-bottom-color: $modus-input-bottom-line-color;
+    border-radius: 4px;
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
@@ -54,6 +56,7 @@
       background-color: transparent;
       border: none;
       color: $modus-input-color;
+      font-family: $primary-font;
       font-size: $rem-12px;
       outline: none;
       padding: 0 $rem-8px;
@@ -78,10 +81,11 @@
 
     .icons {
       align-items: center;
-      background-color: $modus-input-bg;
       color: $modus-input-helper-icon-color;
+      cursor: pointer;
       display: flex;
       font-size: $rem-16px;
+      height: 100%;
       justify-content: center;
       width: 2rem;
 
@@ -205,22 +209,10 @@
   }
 
   .toggle-password {
-    z-index: 9;
-
     svg.visibility,
     svg.visibility-off {
       display: none;
     }
-  }
-
-  .toggle-password:active,
-  .toggle-password:focus,
-  .toggle-password:hover {
-    cursor: pointer;
-  }
-
-  .toggle-password:focus {
-    outline: none !important;
   }
 
   input {
@@ -236,5 +228,11 @@
 
   input[type='text'] + .toggle-password > svg.visibility-off {
     display: inline;
+  }
+
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
   }
 }
