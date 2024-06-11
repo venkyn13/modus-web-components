@@ -25,8 +25,9 @@ import {
   Updater,
   VisibilityState,
   SortingState,
-  Row,
+  Row
 } from '@tanstack/table-core';
+// import { useVirtualizer, Virtualizer } from '@tanstack/react-virtual';
 import {
   COLUMN_ORDER_STATE_KEY,
   COLUMN_SIZING_INFO_STATE_KEY,
@@ -84,6 +85,9 @@ import { createGuid } from '../../utils/utils';
   shadow: true,
 })
 export class ModusTable {
+
+  // private rowVirtualizer: any;
+
   @Element() element: HTMLElement;
 
   /** (Required) To display headers in the table. */
@@ -351,6 +355,15 @@ export class ModusTable {
   private onKeyDown = (event: KeyboardEvent) => this.handleKeyDown(event);
   private onMouseUp = () => this.handleDrop();
 
+  // initializeVirtualization() {
+  //   this.rowVirtualizer = useVirtualizer({
+  //     count: 2000,
+  //     estimateSize: () => 35,
+  //     // overscan: 5,
+  //     getScrollElement: () => document.getElementById('scrollable-element') as HTMLElement,
+  //   });
+  // }
+
   componentWillLoad(): void {
     this._id = this.element.id || `modus-table-${createGuid()}`;
     this.columns = this.columns?.map((column) => ({
@@ -373,6 +386,8 @@ export class ModusTable {
     this.setTableState(initialTableState);
     this.onRowsExpandableChange(this.rowsExpandable);
     this.initializeTable();
+
+    // this.initializeVirtualization();
   }
 
   componentWillRender(): void {

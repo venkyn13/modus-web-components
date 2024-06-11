@@ -1297,6 +1297,9 @@ export namespace Components {
          */
         "wrapText": boolean;
     }
+    interface ModusTableBody {
+        "context": TableContext;
+    }
     interface ModusTableCellEditor {
         "args": ModusTableCellEditorArgs;
         "keyDown": (e: KeyboardEvent, newValue: string) => void;
@@ -2447,6 +2450,12 @@ declare global {
         prototype: HTMLModusTableElement;
         new (): HTMLModusTableElement;
     };
+    interface HTMLModusTableBodyElement extends Components.ModusTableBody, HTMLStencilElement {
+    }
+    var HTMLModusTableBodyElement: {
+        prototype: HTMLModusTableBodyElement;
+        new (): HTMLModusTableBodyElement;
+    };
     interface HTMLModusTableCellEditorElement extends Components.ModusTableCellEditor, HTMLStencilElement {
     }
     var HTMLModusTableCellEditorElement: {
@@ -2671,6 +2680,7 @@ declare global {
         "modus-spinner": HTMLModusSpinnerElement;
         "modus-switch": HTMLModusSwitchElement;
         "modus-table": HTMLModusTableElement;
+        "modus-table-body": HTMLModusTableBodyElement;
         "modus-table-cell-editor": HTMLModusTableCellEditorElement;
         "modus-table-cell-main": HTMLModusTableCellMainElement;
         "modus-table-columns-visibility": HTMLModusTableColumnsVisibilityElement;
@@ -4137,6 +4147,9 @@ declare namespace LocalJSX {
          */
         "wrapText"?: boolean;
     }
+    interface ModusTableBody {
+        "context"?: TableContext;
+    }
     interface ModusTableCellEditor {
         "args"?: ModusTableCellEditorArgs;
         "keyDown"?: (e: KeyboardEvent, newValue: string) => void;
@@ -4589,6 +4602,7 @@ declare namespace LocalJSX {
         "modus-spinner": ModusSpinner;
         "modus-switch": ModusSwitch;
         "modus-table": ModusTable;
+        "modus-table-body": ModusTableBody;
         "modus-table-cell-editor": ModusTableCellEditor;
         "modus-table-cell-main": ModusTableCellMain;
         "modus-table-columns-visibility": ModusTableColumnsVisibility;
@@ -4652,6 +4666,7 @@ declare module "@stencil/core" {
             "modus-spinner": LocalJSX.ModusSpinner & JSXBase.HTMLAttributes<HTMLModusSpinnerElement>;
             "modus-switch": LocalJSX.ModusSwitch & JSXBase.HTMLAttributes<HTMLModusSwitchElement>;
             "modus-table": LocalJSX.ModusTable & JSXBase.HTMLAttributes<HTMLModusTableElement>;
+            "modus-table-body": LocalJSX.ModusTableBody & JSXBase.HTMLAttributes<HTMLModusTableBodyElement>;
             "modus-table-cell-editor": LocalJSX.ModusTableCellEditor & JSXBase.HTMLAttributes<HTMLModusTableCellEditorElement>;
             "modus-table-cell-main": LocalJSX.ModusTableCellMain & JSXBase.HTMLAttributes<HTMLModusTableCellMainElement>;
             "modus-table-columns-visibility": LocalJSX.ModusTableColumnsVisibility & JSXBase.HTMLAttributes<HTMLModusTableColumnsVisibilityElement>;

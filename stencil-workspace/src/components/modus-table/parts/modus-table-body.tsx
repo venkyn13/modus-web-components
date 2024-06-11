@@ -1,34 +1,58 @@
 import {
-  FunctionalComponent,
-  h, // eslint-disable-line @typescript-eslint/no-unused-vars
+  Component,
+  h,
+  Prop,
+  Element,
+  State,
+  Listen,
+  Watch,
+  Host,
+  Method,
 } from '@stencil/core';
 import { ModusTableCellValueChange } from '../models/modus-table.models';
 import { ModusTableCell } from './cell/modus-table-cell';
 import { ModusTableCellCheckbox } from './row/selection/modus-table-cell-checkbox';
 import { COLUMN_DEF_SUB_ROWS_KEY } from '../modus-table.constants';
 import { TableContext } from '../models/table-context.models';
+import { Virtualizer } from '@tanstack/virtual-core';
+import { VirtualizerOptions } from '@tanstack/virtual-core';
+@Component({
+  tag: 'modus-table-body',
+})
+export class ModusTableBody {
+  @Prop() context: TableContext;
+  @Element() el: HTMLModusTableBodyElement;
 
-interface ModusTableBodyProps {
-  context: TableContext;
-}
+  @State() rowVirtualizer: Virtualizer<HTMLDivElement, HTMLTableRowElement>;
+  private tableContainer: HTMLDivElement;
+  
+  componentDidLoad() {
+    const virtualizerOptions: VirtualizerOptions<HTMLDivElement, HTMLTableRowElement> = {
+      count: this.context.tableInstance.getRowModel().rows.length,
+      getScrollElement: () => this.tableContainer,
+      estimateSize: () => 35, // Adjust based on your row height
+      scrollToFn: (offset) => {
+      },
+      observeElementRect: (element, callback) => {
+        return () => {
+        };
+      },
+      observeElementOffset: (element, callback) => {
+       
+        return () => {
+        };
+      },
+    };
 
-export const ModusTableBody: FunctionalComponent<ModusTableBodyProps> = ({ context }) => {
-  const { density, hover, rowSelection, rowSelectionOptions, rowActions, tableInstance: table, updateData } = context;
-  const hasRowActions = rowActions?.length > 0;
-  const multipleRowSelection = rowSelectionOptions?.multiple;
-  let checkboxSize: 'medium' | 'small' = 'medium';
-  if (density === 'compact') {
-    checkboxSize = 'small';
+    this.rowVirtualizer = new Virtualizer(virtualizerOptions);
   }
 
-  // Note: This function supports only 3 levels of nested rows.
-  function handleCellValueChange(props: ModusTableCellValueChange) {
+  handleCellValueChange(props: ModusTableCellValueChange) {
     const { row, accessorKey, newValue } = props;
-    updateData(
+    this.context.updateData(
       (old: unknown[]) => {
         const newData = [...old];
 
-        // rowId is a string of IDs for rows with nested information like subrows.
         const idArray: number[] = [];
         let currentRow = row;
         while (currentRow) {
@@ -52,35 +76,77 @@ export const ModusTableBody: FunctionalComponent<ModusTableBodyProps> = ({ conte
     );
   }
 
-  return (
-    <tbody>
-      {table.getRowModel()?.rows.map((row) => {
-        const { getIsSelected, getIsAllSubRowsSelected, getVisibleCells, subRows, id } = row;
-        const isChecked = getIsSelected() && (subRows?.length ? getIsAllSubRowsSelected() : true);
+  render() {
+    const { density, hover, rowSelection, rowSelectionOptions, rowActions, tableInstance: table } = this.context;
+    const hasRowActions = rowActions?.length > 0;
+    const multipleRowSelection = rowSelectionOptions?.multiple;
+    let checkboxSize: 'medium' | 'small' = 'medium';
+    if (density === 'compact') {
+      checkboxSize = 'small';
+    }
 
-        return (
-          <tr key={id} class={{ 'enable-hover': hover, 'row-selected': isChecked }}>
-            {rowSelection && (
-              <ModusTableCellCheckbox
-                multipleRowSelection={multipleRowSelection}
-                row={row}
-                isChecked={isChecked}
-                checkboxSize={checkboxSize}></ModusTableCellCheckbox>
-            )}
-            {getVisibleCells()?.map((cell, cellIndex) => {
+    console.log('this.context', this.context);
+
+    return (
+      <Host>
+        <div
+          ref={(el) => (this.tableContainer = el)}
+          style={{ overflow: 'auto', height: '800px', position: 'relative' }}
+        >
+          <tbody
+            style={{
+              display: 'grid',
+              height: `${this.rowVirtualizer?.getTotalSize()}px`,
+              position: 'relative',
+            }}
+          >
+            {this.rowVirtualizer?.getVirtualItems().map((virtualRow) => {
+              const row = table.getRowModel().rows[virtualRow.index];
+              const { getIsSelected, getIsAllSubRowsSelected, getVisibleCells, subRows, id } = row;
+              const isChecked = getIsSelected() && (subRows?.length ? getIsAllSubRowsSelected() : true);
+
               return (
-                <ModusTableCell cell={cell} cellIndex={cellIndex} context={context} valueChange={handleCellValueChange} />
+                <tr
+                  key={id}
+                  class={{ 'enable-hover': hover, 'row-selected': isChecked }}
+                  style={{
+                    display: 'flex',
+                    position: 'absolute',
+                    transform: `translateY(${virtualRow.start}px)`,
+                    width: '100%',
+                  }}
+                >
+                  {rowSelection && (
+                    <ModusTableCellCheckbox
+                      multipleRowSelection={multipleRowSelection}
+                      row={row}
+                      isChecked={isChecked}
+                      checkboxSize={checkboxSize}
+                    ></ModusTableCellCheckbox>
+                  )}
+                  {getVisibleCells()?.map((cell, cellIndex) => (
+                    <ModusTableCell
+                      // key={cell.id}
+                      cell={cell}
+                      cellIndex={cellIndex}
+                      context={this.context}
+                      // valueChange={(props) => this.handleCellValueChange(props)}
+                      valueChange={this.handleCellValueChange}
+
+                    />
+                  ))}
+                  {hasRowActions && (
+                    <td class="sticky-right" tabindex="0">
+                      {/* <modus-table-row-actions row={row} context={context} /> */}
+                      <modus-table-row-actions-cell row={row} context={this.context} />
+                    </td>
+                  )}
+                </tr>
               );
             })}
-            {hasRowActions && (
-              <td class="sticky-right" tabindex="0">
-                {/* <modus-table-row-actions row={row} context={context} /> */}
-                <modus-table-row-actions-cell row={row} context={context} />
-              </td>
-            )}
-          </tr>
-        );
-      })}
-    </tbody>
-  );
-};
+          </tbody>
+        </div>
+      </Host>
+    );
+  }
+}

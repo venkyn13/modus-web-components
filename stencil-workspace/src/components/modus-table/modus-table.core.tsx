@@ -150,7 +150,18 @@ export default class ModusTableCore {
     };
 
     this.tableCore = createTable(options);
+    // this.initializeVirtualization();
   }
+
+  // initializeVirtualization() {
+  //   const tableInstance = this.tableCore;
+  //   this.rowVirtualizer = useVirtualizer({
+  //     count: tableInstance.getRowModel().rows.length,
+  //     estimateSize: () => 35,
+  //     overscan: 5,
+  //     getScrollElement: () => document.getElementById('scrollable-element') as HTMLElement,
+  //   });
+  // }
 
   getTableInstance(): Table<unknown> {
     return this.tableCore;
